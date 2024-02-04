@@ -50,10 +50,10 @@ const App = () => {
         jobs.map((ele) => <CompA jobsDetails={ele} key={ele.id} />)}
       {jobs.length !== 0 && loadNextFlag ? (
         <button id="load-btn" onClick={() => setLoadNextFlag((prev) => !prev)}>
-          Load
+          Load more jobs
         </button>
       ) : (
-        <span>Loading..............</span>
+        <div id="loader">Loading..............</div>
       )}
     </div>
   );
