@@ -1,25 +1,62 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import CompA from "./CompA";
 
-function App() {
+const App = () => {
+  const [jobIds, setJobIDs] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const [loadNext, setLoadNext] = useState(0);
+  const [loadNextFlag, setLoadNextFlag] = useState(false);
+
+  const fetchJobDetails = async () => {
+    if (jobIds.length != 0 && jobIds.length !== jobs.length) {
+      let i,
+        temp = [];
+      for (i = loadNext; i < loadNext + 6; i++) {
+        const requestDetails = await fetch(
+          `https://hacker-news.firebaseio.com/v0/item/${jobIds[i + 1]}.json`
+        );
+        const response = await requestDetails.json();
+        // console.log("i=", i, response);
+        temp = [...temp, response];
+      }
+      console.log(temp);
+      setJobs((prev) => [...prev, ...temp]);
+      setLoadNextFlag((prev) => !prev);
+      setLoadNext(i);
+    }
+  };
+
+  const fetchJobIds = async () => {
+    const requestIds = await fetch(
+      "https://hacker-news.firebaseio.com/v0/jobstories.json"
+    );
+    const response = await requestIds.json();
+    setJobIDs([...response]);
+  };
+
+  useEffect(() => {
+    fetchJobIds();
+  }, []);
+
+  useEffect(() => {
+    console.log(loadNextFlag);
+    !loadNextFlag && fetchJobDetails();
+  }, [jobIds, loadNextFlag]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div id="board-wrapper">
+      <h2>Hacker News Job Board</h2>
+      {jobs.length !== 0 &&
+        jobs.map((ele) => <CompA jobsDetails={ele} key={ele.id} />)}
+      {jobs.length !== 0 && loadNextFlag ? (
+        <button id="load-btn" onClick={() => setLoadNextFlag((prev) => !prev)}>
+          Load
+        </button>
+      ) : (
+        <span>Loading..............</span>
+      )}
     </div>
   );
-}
+};
 
 export default App;
